@@ -29,4 +29,5 @@ bool EnterLowDir(string DirectorName)
 		}
 		it++;
 	}
+	return false;
 }
