@@ -21,7 +21,7 @@ void command()
 	}
 }
 
-void main()
+int main()
 {
 	InitialUser();
 	cout << "*****************欢迎使用文件系统****************" << endl;
@@ -244,5 +244,5 @@ void main()
 		}
 	}
 	system("pause");
-	exit(0);
+	return 0;
 }
