@@ -151,7 +151,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CloseFile.cpp" />
+    <ClCompile Include="CopyDirector.cpp" />
+    <ClCompile Include="CopyFile.cpp" />
+    <ClCompile Include="CreateFile.cpp" />
+    <ClCompile Include="CutDirector.cpp" />
+    <ClCompile Include="CutFile.cpp" />
+    <ClCompile Include="DeleteDirector.cpp" />
+    <ClCompile Include="DeleteFile.cpp" />
+    <ClCompile Include="EnterLowDir.cpp" />
+    <ClCompile Include="HomePage.cpp" />
+    <ClCompile Include="InitialFileSystem.cpp" />
+    <ClCompile Include="LoadFileSystem.cpp" />
+    <ClCompile Include="LogInFileSystem.cpp" />
     <ClCompile Include="MyFileSystem.cpp" />
+    <ClCompile Include="MakeDirector.cpp" />
+    <ClCompile Include="MyFileSystem.cpp" />
+    <ClCompile Include="OpenFile.cpp" />
+    <ClCompile Include="ReadFile.cpp" />
+    <ClCompile Include="RenameDirector.cpp" />
+    <ClCompile Include="RenameFile.cpp" />
+    <ClCompile Include="ReturnToParentDir.cpp" />
+    <ClCompile Include="SaveFileSystem.cpp" />
+    <ClCompile Include="SearchDirector.cpp" />
+    <ClCompile Include="SearchFile.cpp" />
+    <ClCompile Include="ShowDirector.cpp" />
+    <ClCompile Include="WriteFile.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Head.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

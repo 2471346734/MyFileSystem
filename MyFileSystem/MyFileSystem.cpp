@@ -1,10 +1,248 @@
-ï»¿// MyFileSystem.cpp : æ­¤æ–‡ä»¶åŒ…å« "main" å‡½æ•°ã€‚ç¨‹åºæ‰§è¡Œå°†åœ¨æ­¤å¤„å¼€å§‹å¹¶ç»“æŸã€‚
-//
+#include "Head.h"
 
-#include <iostream>
+FileSystem myFileSystem;
 
-int main()
+void command()
 {
-    std::cout << "Hello World!\n";
+	stack<int> command;
+	director myDirector = myFileSystem.SystemDirector[myFileSystem.DirectorIndex];//±£´æµ±Ç°Ä¿Â¼ºÅ
+	//±éÀúµ±Ç°Ä¿Â¼µÄ¸¸Ä¿Â¼£¬Ñ¹Õ»
+	while (myDirector.ParentDirector != -1)
+	{
+		command.push(myDirector.DirectorId);
+		myDirector = myFileSystem.SystemDirector[myDirector.ParentDirector];
+	}
+	command.push(myDirector.DirectorId);
+	cout << myFileSystem.CurrentUser.UserName << "@FileSystem:~$ ";
+	while (!command.empty())
+	{
+		cout << myFileSystem.SystemDirector[command.top()].DirectorName << ">";
+		command.pop();
+	}
 }
 
+void main()
+{
+	InitialUser();
+	cout << "*****************»¶Ó­Ê¹ÓÃÎÄ¼şÏµÍ³****************" << endl;
+	if (LogInFileSystem())
+	{
+		cout << "ÄúÒÑ³É¹¦µÇÂ¼£¡" << endl<<endl;
+	}
+	while (1)
+	{
+		cout << "ÊÇ·ñ³õÊ¼»¯ÎÄ¼şÏµÍ³ Y/N" << endl;
+		char ch;
+		cin >> ch;
+		if (ch == 'Y' || ch == 'y')
+		{
+			InitialFileSystem();
+			cout << "ÄúÒÑ³É¹¦³õÊ¼»¯ÎÄ¼şÏµÍ³" << endl<<endl;
+			break;
+		}
+		else
+		{
+			if (ch == 'N' || ch == 'n')
+			{
+				LoadFileSystem();
+				cout << "ÄúÒÑ³É¹¦ÔØÈëÎÄ¼şÏµÍ³" << endl<<endl;
+				break;
+			}
+			else
+			{
+				cout << "ÊäÈëÓĞÎó£¬Çë´¦ÊäÈëY/N" << endl;
+
+			}
+		}
+	}
+	HomePage();
+	while (1)
+	{
+		command();
+		string command;
+		cin >> command;
+		string operating, operating2;
+		if (command == "mkdir")
+		{
+			cin >> operating;
+			MakeDirector(operating);
+			continue;
+		}
+		if (command == "mkfile")
+		{
+			cin >> operating;
+			CreateFile(operating);
+			continue;
+		}
+		if (command == "rmdir")
+		{
+			cin >> operating;
+			DeleteDirector(operating);
+			continue;
+		}
+		if (command == "rmfile")
+		{
+			cin >> operating;
+			DeleteFile(operating);
+			continue;
+		}
+		if (command == "cpdir")
+		{
+			cin >> operating;
+			cin >> operating2;
+			CopyDirector(operating, operating2);
+			continue;
+		}
+		if (command == "cpfile")
+		{
+			cin >> operating;
+			cin >> operating2;
+			CopyFile(operating, operating2);
+			continue;
+		}
+		if (command == "mvdir")
+		{
+			cin >> operating;
+			cin >> operating2;
+			CutDirector(operating, operating2);
+			continue;
+		}
+		if (command == "mvfile")
+		{
+			cin >> operating;
+			cin >> operating2;
+			CutFile(operating, operating2);
+			continue;
+		}
+		if (command == "rndir")
+		{
+			cin >> operating;
+			cin >> operating2;
+			RenameDirector(operating, operating2);
+			continue;
+		}
+		if (command == "rnfile")
+		{
+			cin >> operating;
+			cin >> operating2;
+			RenameFile(operating, operating2);
+			continue;
+		}
+		if (command == "fddir")
+		{
+			cin >> operating;
+			if (SearchDirector(operating) != -1)
+				cout << "¸ÃÄ¿Â¼´æÔÚÓÚµ±Ç°ÎÄ¼ş¼Ğ£¡" << endl;
+			else
+				cout << "¸ÃÄ¿Â¼²»´æÔÚÓÚµ±Ç°ÎÄ¼ş¼Ğ£¡" << endl;
+			continue;
+		}
+		if (command == "fdfile")
+		{
+			cin >> operating;
+			if (SearchFile(operating) != -1)
+				cout << "¸ÃÎÄ¼ş´æÔÚÓÚµ±Ç°ÎÄ¼ş¼Ğ£¡" << endl;
+			else
+				cout << "¸ÃÎÄ¼ş²»´æÔÚÓÚµ±Ç°ÎÄ¼ş¼Ğ£¡" << endl;
+			continue;
+		}
+		if (command == "cd")
+		{
+			cin >> operating;
+			EnterLowDir(operating);
+			continue;
+		}
+		if (command == "cd..")
+		{
+			ReturnToParentDir();
+			continue;
+		}
+		if (command == "rndir")
+		{
+			cin >> operating;
+			cin >> operating2;
+			RenameDirector(operating, operating2);
+			continue;
+		}
+		if (command == "rnfile")
+		{
+			cin >> operating;
+			cin >> operating2;
+			RenameFile(operating, operating2);
+			continue;
+		}
+		if (command == "ofile")
+		{
+			cin >> operating;
+			OpenFileFunc(operating);
+			continue;
+		}
+		if (command == "rfile")
+		{
+			cin >> operating;
+			ReadFile(operating);
+			continue;
+		}
+		if (command == "wfile")
+		{
+			cin >> operating;
+			cin >> operating2;
+			WriteFile(operating, operating2);
+			continue;
+		}
+		if (command == "cfile")
+		{
+			cin >> operating;
+			CloseFile(operating);
+			continue;
+		}
+		if (command == "ls")
+		{
+			ShowDirector();
+			continue;
+		}
+		if (command == "save")
+		{
+			SaveFileSystem();
+			continue;
+		}
+		if (command == "format")
+		{
+			InitialFileSystem();
+			continue;
+		}
+		if (command == "logout")
+		{
+			char ch;
+			cout << "ÊÇ·ñ±£´æÎÄ¼şÏµÍ³ Y/N" << endl;
+			cin >> ch;
+			if (ch == 'Y' || ch == 'y')
+			{
+				SaveFileSystem();
+				break;
+			}
+			else
+			{
+				if (ch != 'N' || ch != 'n')
+				{
+					cout << "ÊäÈëÓĞÎó£¬Çë´¦ÊäÈëY/N" << endl;
+				}
+			}
+		}
+		else
+		{
+			cout << "´íÎóÖ¸Áî£¬ÇëÖØĞÂÊäÈë" << endl;
+		}
+		while (1)    // ¹ıÂËµôÊ£ÓàÖ¸Áî
+		{
+			char ch;
+			ch = getchar();
+			if (ch == '\n')
+			{
+				break;
+			}
+		}
+	}
+	system("pause");
+	exit(0);
+}
