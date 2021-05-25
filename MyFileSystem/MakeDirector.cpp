@@ -7,7 +7,7 @@ bool MakeDirector(string DirectorName)
 		cout << "已存在同名文件夹" << endl;
 		return false;
 	}
-	if (SearchFile(DirectorName) != -1)
+	if (SearchFile(DirectorName) != -1)////同名文件应该允许
 	{
 		cout << "已存在同名文件" << endl;
 		return false;

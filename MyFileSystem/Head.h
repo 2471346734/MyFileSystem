@@ -7,9 +7,9 @@
 #include <string>
 using namespace std;
 
-#define BLOCKLENGTH 512
-#define BLOCKNUM 512
-#define LISTNUM 4
+#define BLOCKLENGTH 512	//¿é³¤¶È
+#define BLOCKNUM 512	//¿éÊý
+#define LISTNUM 4		//
 #define LISTLENGTH BLOCKNUM/LISTNUM
 #define FILELENGTH 10
 #define USERNUM 8

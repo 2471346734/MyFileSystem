@@ -122,7 +122,7 @@ void LoadBlock(FILE *fd)
 void LoadFileSystem()
 {
 	FILE* fd;
-	string RootPath = "C:/Users/WuJue/Desktop/FileSystem.txt";
+	string RootPath = "C:/Users/zhangjiarong/Desktop/FileSystem.txt";
 	if (fopen_s(&fd, RootPath.c_str(), "r") != 0)
 	{
 		cout << "不存在文件系统!" << endl;

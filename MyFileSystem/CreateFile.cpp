@@ -29,7 +29,7 @@ bool CreateFile(string FileName)
 		cout << "本文件夹中已存在同名文件，创建失败" << endl;
 		return false;
 	}
-	if (SearchDirector(FileName) != -1)
+	if (SearchDirector(FileName) != -1)////应该允许
 	{
 		cout << "本文件夹中已存在同名子文件夹，创建失败" << endl;
 		return false;
