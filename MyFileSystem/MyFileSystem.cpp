@@ -1,10 +1,10 @@
 #include "Head.h"
 
 FileSystem myFileSystem;
-
+FILE* fp;
 void command()
 {
-	stack<int> command;
+	/*stack<int> command;
 	director myDirector = myFileSystem.SystemDirector[myFileSystem.DirectorIndex];//保存当前目录号
 	//遍历当前目录的父目录，压栈
 	while (myDirector.ParentDirector != -1)
@@ -18,44 +18,65 @@ void command()
 	{
 		cout << myFileSystem.SystemDirector[command.top()].DirectorName << ">";
 		command.pop();
+	}*/
+
+	string cur_user = myFileSystem.users[myFileSystem.cur_userid].u_name;
+	string cur_dir_name;
+	for (string s : myFileSystem.users[myFileSystem.cur_userid].path) {
+		cur_dir_name = cur_dir_name + "/";
+		cur_dir_name = cur_dir_name + s;
 	}
+	string cmd = cur_user + "@/" + cur_dir_name + ">";
+	cout << cmd;
 }
 
 int main()
 {
+	if (!access("FileSystem", 0)) {//文件卷存在
+		if ((fp = fopen("FileSystem", "r+b")) != nullptr) {
+			cout << "文件卷打开成功！" << endl;
+		}
+		else
+		{
+			cout << "文件卷打开失败！" << endl;
+			exit(1);
+		}
+	}
+	else//文件卷不存在
+	{
+		
+		while (1)
+		{
+			cout << "文件卷不存在，是否创建文件卷并格式化？[Y/N]" << endl;
+			char ch;
+			cin >> ch;
+			if (ch == 'y' || ch == 'Y') {
+				if (InitialFileSystem() == OK) {
+					cout << "您已成功初始化文件系统！" << endl;
+					break;
+				}
+				else
+				{
+					cout << "初始化失败！" << endl;
+					exit(1);
+				}
+			}
+			else if(ch == 'n' || ch == 'N')
+			{
+				cout << "已退出系统！" << endl;
+				exit(0);
+			}
+		}
+	}
 	InitialUser();
 	cout << "*****************欢迎使用文件系统****************" << endl;
 	if (LogInFileSystem())
 	{
 		cout << "您已成功登录！" << endl<<endl;
 	}
-	while (1)
-	{
-		cout << "是否初始化文件系统 Y/N" << endl;
-		char ch;
-		cin >> ch;
-		if (ch == 'Y' || ch == 'y')
-		{
-			InitialFileSystem();
-			cout << "您已成功初始化文件系统" << endl<<endl;
-			break;
-		}
-		else
-		{
-			if (ch == 'N' || ch == 'n')
-			{
-				LoadFileSystem();
-				cout << "您已成功载入文件系统" << endl<<endl;
-				break;
-			}
-			else
-			{
-				cout << "输入有误，请处输入Y/N" << endl;
-
-			}
-		}
-	}
+	LoadFileSystem();
 	HomePage();
+	//cin.ignore();
 	while (1)
 	{
 		command();
@@ -65,10 +86,15 @@ int main()
 		if (command == "mkdir")
 		{
 			cin >> operating;
-			MakeDirector(operating);
+			mkdir(operating.c_str());
 			continue;
 		}
-		if (command == "mkfile")
+		if (command == "help")
+		{
+			HomePage();
+			continue;
+		}
+		/*if (command == "mkfile")
 		{
 			cin >> operating;
 			CreateFile(operating);
@@ -145,13 +171,13 @@ int main()
 			else
 				cout << "该文件不存在于当前文件夹！" << endl;
 			continue;
-		}
+		}*/
 		if (command == "cd")
 		{
 			cin >> operating;
-			EnterLowDir(operating);
+			chdir(operating.c_str());
 			continue;
-		}
+		}/*
 		if (command == "cd..")
 		{
 			ReturnToParentDir();
@@ -195,13 +221,13 @@ int main()
 			cin >> operating;
 			CloseFile(operating);
 			continue;
-		}
+		}*/
 		if (command == "ls")
 		{
-			ShowDirector();
+			_dir();
 			continue;
 		}
-		if (command == "save")
+		/*if (command == "save")
 		{
 			SaveFileSystem();
 			continue;
@@ -241,7 +267,7 @@ int main()
 			{
 				break;
 			}
-		}
+		}*/
 	}
 	system("pause");
 	return 0;
