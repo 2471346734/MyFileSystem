@@ -174,7 +174,7 @@ class FileSystem
 public:
 	SuperBlock superblock;
 	unordered_map<unsigned short, user> users;
-	unordered_map<int, Inode> Hinode;
+	unordered_map<int, Inode*> Hinode;
 	Dir root_dir;
 	int cur_userid;
 	Inode* cur_path_inode;
@@ -218,11 +218,18 @@ extern Inode * iget(unsigned int dinodeid);
 extern void iput(Inode * pinode);
 extern void bfree(unsigned int block_num);
 extern unsigned int  balloc();
-extern int namei(const Dir& dir, const char *name);
-extern int iname(Dir& dir, const char * name);
+extern int namei(const char *name);
+extern int iname(const char * name);
 extern Inode * ialloc();
 extern void ifree(unsigned dinodeid);
 extern void _dir();
 extern void mkdir(const char *dirname);
 extern bool access(Inode * inode, unsigned short mode);
 extern void chdir(const char * dirname);
+extern int creat(const char * filename, unsigned short mode);
+extern void close(unsigned short cfd);
+extern bool Delete(const char *filename);
+extern int open(const char * filename, unsigned short openmode);
+extern unsigned int read(int fd1, char * buf, unsigned int size);
+extern bool write(int fd1, char * buf, unsigned int size);
+

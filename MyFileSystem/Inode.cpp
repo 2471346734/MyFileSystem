@@ -6,7 +6,7 @@ Inode * ialloc()
 	Inode * temp_inode;
 	unsigned int cur_di, count;
 	int i, block_end_flag;
-	if (myFileSystem.superblock.s_pinode == NICINOD)
+	if (myFileSystem.superblock.s_pinode == NICINOD)//超级块中最后一个i节点
 	{
 		i = 0;
 		count = 0;
@@ -69,11 +69,11 @@ Inode * iget(unsigned int dinodeid)    /* iget( ) */
 	unsigned int inodeid;
 	long addr;
 	Inode *temp, *newinode;
-	inodeid = dinodeid % NHINO;
+	inodeid = dinodeid ;
 
 	if (myFileSystem.Hinode.count(dinodeid))
 	{
-		return &myFileSystem.Hinode[dinodeid];
+		return myFileSystem.Hinode[dinodeid];
 	}
 
 	/*	1. calculate the addr of the dinode in the file sys column */
@@ -88,8 +88,9 @@ Inode * iget(unsigned int dinodeid)    /* iget( ) */
 	/*	3.read the dinode to the inode */
 	fseek(fp, addr, SEEK_SET);
 	fread(&(newinode->di_number), DINODESIZ, 1, fp);
+	
 	/* 4.put it into hinode0[inodeid] queue */
-	myFileSystem.Hinode[dinodeid] = *newinode;
+	myFileSystem.Hinode[dinodeid] = newinode;
 	/* 5.initialize the inode */
 	newinode->i_count = 1;
 	newinode->i_flag = 0;    /* flag for not update */
@@ -100,7 +101,7 @@ Inode * iget(unsigned int dinodeid)    /* iget( ) */
 	return newinode;
 }
 
-void iput(Inode * pinode) /* iput ( ) */
+void iput(Inode * pinode) //释放内存i节点，并将i节点内容写回磁盘
 {
 	long addr;
 	unsigned int block_num, i;

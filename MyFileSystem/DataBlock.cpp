@@ -20,7 +20,7 @@ unsigned int  balloc()
 		free_block_num = block_buf[NICFREE];
 		for (i = 0; i < free_block_num; i++)
 		{
-			myFileSystem.superblock.s_free[NICFREE - 1 - i] = block_buf[i];
+			myFileSystem.superblock.s_free[NICFREE - 1 - i] = block_buf[NICFREE - 1 - i];
 		}
 		myFileSystem.superblock.s_pfree = NICFREE - free_block_num;
 	}
@@ -38,13 +38,19 @@ void bfree(unsigned int block_num)
 		block_buf[NICFREE] = NICFREE;
 		for (i = 0; i < NICFREE; i++)
 		{
-			block_buf[i] = myFileSystem.superblock.s_free[NICFREE - 1 - i];
+			block_buf[NICFREE - 1 - i] = myFileSystem.superblock.s_free[NICFREE - 1 - i];
 		}
 		myFileSystem.superblock.s_pfree = NICFREE - 1;
+		myFileSystem.superblock.s_free[myFileSystem.superblock.s_pfree] = block_num;
+		fseek(fp, DATASTART + block_num * BLOCKSIZ, SEEK_SET);
+		fwrite(block_buf, 1, BLOCKSIZ, fp);
+		myFileSystem.superblock.s_nfree++;
+		myFileSystem.superblock.s_fmod = SUPDATE;
 	}
-	else memset(block_buf, 0, BLOCKSIZ);
-	fseek(fp, DATASTART + block_num * BLOCKSIZ, SEEK_SET);
-	fwrite(block_buf, 1, BLOCKSIZ, fp);
-	myFileSystem.superblock.s_nfree++;
-	myFileSystem.superblock.s_fmod = SUPDATE;
+	else {
+		myFileSystem.superblock.s_pfree--;
+		myFileSystem.superblock.s_free[myFileSystem.superblock.s_pfree] = block_num;
+		myFileSystem.superblock.s_nfree++;
+		myFileSystem.superblock.s_fmod = SUPDATE;
+	}
 }

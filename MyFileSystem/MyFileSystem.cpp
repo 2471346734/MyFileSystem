@@ -94,67 +94,67 @@ int main()
 			HomePage();
 			continue;
 		}
-		/*if (command == "mkfile")
+		if (command == "mkfile")
 		{
 			cin >> operating;
-			CreateFile(operating);
+			//CreateFile(operating);
 			continue;
 		}
 		if (command == "rmdir")
 		{
 			cin >> operating;
-			DeleteDirector(operating);
+			//DeleteDirector(operating);
 			continue;
 		}
 		if (command == "rmfile")
 		{
 			cin >> operating;
-			DeleteFile(operating);
+			//DeleteFile(operating);
 			continue;
 		}
-		if (command == "cpdir")
+		/*if (command == "cpdir")
 		{
 			cin >> operating;
 			cin >> operating2;
 			CopyDirector(operating, operating2);
 			continue;
-		}
-		if (command == "cpfile")
+		}*/
+		/*if (command == "cpfile")
 		{
 			cin >> operating;
 			cin >> operating2;
 			CopyFile(operating, operating2);
 			continue;
-		}
-		if (command == "mvdir")
+		}*/
+		/*if (command == "mvdir")
 		{
 			cin >> operating;
 			cin >> operating2;
 			CutDirector(operating, operating2);
 			continue;
-		}
-		if (command == "mvfile")
+		}*/
+		/*if (command == "mvfile")
 		{
 			cin >> operating;
 			cin >> operating2;
 			CutFile(operating, operating2);
 			continue;
-		}
-		if (command == "rndir")
+		}*/
+		/*if (command == "rndir")
 		{
 			cin >> operating;
 			cin >> operating2;
 			RenameDirector(operating, operating2);
 			continue;
-		}
-		if (command == "rnfile")
+		}*/
+		/*if (command == "rnfile")
 		{
 			cin >> operating;
 			cin >> operating2;
 			RenameFile(operating, operating2);
 			continue;
-		}
-		if (command == "fddir")
+		}*/
+		/*if (command == "fddir")
 		{
 			cin >> operating;
 			if (SearchDirector(operating) != -1)
@@ -162,8 +162,8 @@ int main()
 			else
 				cout << "该目录不存在于当前文件夹！" << endl;
 			continue;
-		}
-		if (command == "fdfile")
+		}*/
+		/*if (command == "fdfile")
 		{
 			cin >> operating;
 			if (SearchFile(operating) != -1)
@@ -177,46 +177,41 @@ int main()
 			cin >> operating;
 			chdir(operating.c_str());
 			continue;
-		}/*
-		if (command == "cd..")
-		{
-			ReturnToParentDir();
-			continue;
 		}
-		if (command == "rndir")
+		/*if (command == "rndir")
 		{
 			cin >> operating;
 			cin >> operating2;
 			RenameDirector(operating, operating2);
 			continue;
-		}
-		if (command == "rnfile")
+		}*/
+		/*if (command == "rnfile")
 		{
 			cin >> operating;
 			cin >> operating2;
 			RenameFile(operating, operating2);
 			continue;
-		}
-		if (command == "ofile")
+		}*/
+		/*if (command == "ofile")
 		{
 			cin >> operating;
 			OpenFileFunc(operating);
 			continue;
-		}
-		if (command == "rfile")
+		}*/
+		/*if (command == "rfile")
 		{
 			cin >> operating;
 			ReadFile(operating);
 			continue;
-		}
-		if (command == "wfile")
+		}*/
+		/*if (command == "wfile")
 		{
 			cin >> operating;
 			cin >> operating2;
 			WriteFile(operating, operating2);
 			continue;
-		}
-		if (command == "cfile")
+		}*/
+		/*if (command == "cfile")
 		{
 			cin >> operating;
 			CloseFile(operating);

@@ -28,4 +28,6 @@ void LoadFileSystem()
 		myFileSystem.root_dir.size++;
 	}
 	myFileSystem.users[myFileSystem.cur_userid].cur_dir = myFileSystem.root_dir;
+	
+	myFileSystem.Hinode.clear();
 }

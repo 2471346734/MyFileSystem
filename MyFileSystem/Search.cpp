@@ -1,7 +1,8 @@
 #include "Head.h"
 
-int namei(const Dir& dir,const char *name) //ÔÚdirÖĞËÑË÷ÃûÎªnameµÄÄ¿Â¼ÏîµÄi½ÚµãºÅ
+int namei(const char *name) //ÔÚdirÖĞËÑË÷ÃûÎªnameµÄÄ¿Â¼ÏîµÄi½ÚµãºÅ
 {
+	Dir& dir = myFileSystem.users[myFileSystem.cur_userid].cur_dir;
 	int i, notfound = 1;
 	/*cout<<"---------------------------------------------------------------------------------------------------"<<endl;
 	cout<<"---------------------------------------------------------------------------------------------------"<<endl;*/
@@ -15,8 +16,9 @@ int namei(const Dir& dir,const char *name) //ÔÚdirÖĞËÑË÷ÃûÎªnameµÄÄ¿Â¼ÏîµÄi½Úµãº
 	return NOT_FOUND;
 };
 
-int iname(Dir& dir,const char * name)	//·µ»ØdirÄ¿Â¼ÖĞÃûÎªnameµÄ¿ÕÄ¿Â¼ÏîÔÚdirÖĞµÄÏÂ±ê
+int iname(const char * name)	//·µ»ØdirÄ¿Â¼ÖĞÃûÎªnameµÄ¿ÕÄ¿Â¼ÏîÔÚdirÖĞµÄÏÂ±ê
 {
+	Dir& dir = myFileSystem.users[myFileSystem.cur_userid].cur_dir;
 	int i, notfound = 1;
 	for (i = 0; ((i < DIRNUM) && (notfound)); i++)
 	{

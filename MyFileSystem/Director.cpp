@@ -43,7 +43,7 @@ void mkdir(const char *dirname)	/* mkdir */
 	Direct buf[BLOCKSIZ / DIRITEM];
 	unsigned int block;
 	memset(buf, 0, (BLOCKSIZ / DIRITEM) * sizeof(Direct));
-	dirid = namei(*cur_dir,dirname);
+	dirid = namei(dirname);
 	if (dirid != NOT_FOUND)
 	{
 		inode = iget(dirid);
@@ -54,7 +54,7 @@ void mkdir(const char *dirname)	/* mkdir */
 		iput(inode);
 		return;
 	}
-	dirpos = iname(*cur_dir, dirname);
+	dirpos = iname(dirname);
 	inode = ialloc();
 	cur_dir->direct[dirpos].d_ino = inode->i_ino;
 	cur_dir->size++;
@@ -86,13 +86,29 @@ void chdir(const char * dirname)
 	int dirid, i, j;
 	Inode * inode;
 	unsigned short block;
+	if (myFileSystem.cur_path_inode->i_ino == 1) {
+		if (strcmp(dirname, ".") && strcmp(dirname, "..")) {
+			myFileSystem.users[myFileSystem.cur_userid].path.push_back(dirname);
+		}
+	}
+	else
+	{
+		if (!strcmp(dirname, "..")) {
+			myFileSystem.users[myFileSystem.cur_userid].path.pop_back();
+		}
+		else if(strcmp(dirname, "."))
+		{
+			myFileSystem.users[myFileSystem.cur_userid].path.push_back(dirname);
+		}
+	}
+		
 	if (!strcmp(dirname, "/"))
 	{
 		dirid = 1;
 	}
 	else
 	{
-		dirid = namei(myFileSystem.users[myFileSystem.cur_userid].cur_dir,dirname);
+		dirid = namei(dirname);
 
 		if (dirid == NOT_FOUND)
 		{
@@ -111,33 +127,18 @@ void chdir(const char * dirname)
 
 	//	write back the current directory 
 	myFileSystem.cur_path_inode->di_size = myFileSystem.users[myFileSystem.cur_userid].cur_dir.size*DIRITEM;
-	if (myFileSystem.cur_path_inode->i_ino > 3)
+	for (i = 0; i < myFileSystem.cur_path_inode->di_size / BLOCKSIZ + 1; i++)
 	{
-		for (i = 0; i < myFileSystem.cur_path_inode->di_size / BLOCKSIZ + 1; i++)
-		{
-			bfree(myFileSystem.cur_path_inode->di_addr[i]);
-		}
-		for (i = 0; i < myFileSystem.users[myFileSystem.cur_userid].cur_dir.size; i += BLOCKSIZ / DIRITEM)
-		{
-			block = balloc();
-			myFileSystem.cur_path_inode->di_addr[i] = block;
-			fseek(fp, DATASTART + block * BLOCKSIZ, SEEK_SET);
-			fwrite(&myFileSystem.users[myFileSystem.cur_userid].cur_dir.direct[i], 1, BLOCKSIZ, fp);
-		}
-		iput(myFileSystem.cur_path_inode);
+		bfree(myFileSystem.cur_path_inode->di_addr[i]);
 	}
-	else
+	for (i = 0; i < myFileSystem.users[myFileSystem.cur_userid].cur_dir.size; i += BLOCKSIZ / DIRITEM)
 	{
-		for (i = 0; i < myFileSystem.users[myFileSystem.cur_userid].cur_dir.size; i += BLOCKSIZ / DIRITEM)
-		{
-			fseek(fp, DATASTART + myFileSystem.cur_path_inode->di_addr[i] * BLOCKSIZ, SEEK_SET);
-			fwrite(&myFileSystem.users[myFileSystem.cur_userid].cur_dir.direct[i], 1, BLOCKSIZ, fp);
-		}
-		long addr = DINODESTART + myFileSystem.cur_path_inode->i_ino * DINODESIZ;
-		fseek(fp, addr, SEEK_SET);
-		fwrite(&myFileSystem.cur_path_inode->di_number, DINODESIZ, 1, fp);
+		block = balloc();
+		myFileSystem.cur_path_inode->di_addr[i] = block;
+		fseek(fp, DATASTART + block * BLOCKSIZ, SEEK_SET);
+		fwrite(&myFileSystem.users[myFileSystem.cur_userid].cur_dir.direct[i], 1, BLOCKSIZ, fp);
 	}
-	//iput (cur_path_inode);//add here
+	iput(myFileSystem.cur_path_inode);
 	myFileSystem.cur_path_inode = inode;
 
 	//	read the change dir from disk 
@@ -156,7 +157,6 @@ void chdir(const char * dirname)
 	{
 		myFileSystem.users[myFileSystem.cur_userid].cur_dir.size++;
 	}
-	if(dirname=="..")
-	myFileSystem.users[myFileSystem.cur_userid].path.push_back(dirname);
+	
 	return;
 }

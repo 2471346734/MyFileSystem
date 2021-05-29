@@ -102,6 +102,7 @@
     <ClCompile Include="Access.cpp" />
     <ClCompile Include="DataBlock.cpp" />
     <ClCompile Include="Director.cpp" />
+    <ClCompile Include="File.cpp" />
     <ClCompile Include="HomePage.cpp" />
     <ClCompile Include="InitialFileSystem.cpp" />
     <ClCompile Include="Inode.cpp" />
