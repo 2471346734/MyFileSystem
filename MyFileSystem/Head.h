@@ -6,30 +6,32 @@
 #include <list>
 #include <string>
 #include < unordered_map >
+#include<map>
 #include<io.h>
+#include<algorithm>
+#include<queue>
 using namespace std;
 
-#define BLOCKSIZ    512 //每块大小
-#define SYSOPENFILE 40  //系统打开文件表最大项数
-#define DIRNUM      128 //每个目录所包含的最大目录项数（文件数）
-#define DIRSIZ      12//14  //每个目录项名字部分所占字节数，另加i节点号4个字节
+#define BLOCKSIZ    128 //每块大小
+#define SUPERSIZ	512
+#define DIRSIZ      12  //每个目录项名字部分所占字节数，另加i节点号4个字节
 #define DIRITEM     sizeof(struct Direct)//每个目录项所占字节数
-
+#define DIRNUM      BLOCKSIZ/DIRITEM //每个目录所包含的最大目录项数（文件数）
 #define UNAME       20  //用户名长度
 #define PWDSIZ      12  //口令字
 #define PWDNUM      10  //最多可设10个口令登录
 #define NOFILE      20  //每个用户最多可打开20个文件，即用户打开文件表最大项数
 #define NADDR       10  //每个i节点最多指向几块，addr[0]~addr[NADDR]
-#define NHINO       128 //共128个Hash链表，提供索引i节点
 #define USERNUM     10  //最多允许几个用户登录
 #define DINODESIZ   sizeof(struct Dinode)//每个磁盘i节点所占字节
 
-#define DINODEBLK   32  //所有磁盘i节点共占32个物理块
-#define FILEBLK     512 //共有512个目录文件物理块
+#define DINODEBLK   16  //所有磁盘i节点共占32个物理块
+#define FILEBLK     48 //共有512个目录文件物理块
 #define NICFREE     50  //超级块中空闲块数组的最大项数
 #define NICINOD     50  //超级块中空闲i节点的最大项数
-#define DINODESTART 2*BLOCKSIZ  //i节点起始地址
-#define DATASTART   (2+DINODEBLK)*BLOCKSIZ  //目录、文件区起始地址
+#define DINODESTART 2*SUPERSIZ  //i节点起始地址
+#define DATASTART   DINODESTART+DINODEBLK*BLOCKSIZ  //目录、文件区起始地址
+#define TOTALSIZ	DATASTART+BLOCKSIZ*FILEBLK		//文件卷总大小
 
 /*文件类型*/
 #define DIEMPTY     00000
@@ -61,9 +63,9 @@ using namespace std;
 #define IUPDATE     00002//i节点修改
 
 /*文件读写模式*/
-#define FREAD       00001
-#define FWRITE      00002
-#define FAPPEND     00004
+const unsigned short FREAD = 00001;
+const unsigned short FWRITE = 00002;
+const unsigned short FAPPEND = 00004;
 
 #define DISKFULL    65535//磁盘满
 
@@ -72,7 +74,7 @@ using namespace std;
 
 #define SEEK_SET    0//文件搜索
 
-#define NOT_FOUND -1//未找到标志
+#define NOT_FOUND 65535//未找到标志
 
 enum status
 {
@@ -80,8 +82,6 @@ enum status
 };
 typedef struct Inode//内存i节点
 {
-	//struct Inode *i_forw;
-	//struct Inode *i_back;
 	char i_flag;
 	unsigned int i_ino;//磁盘索引节点标志
 	unsigned int i_count;//引用计数
@@ -147,6 +147,9 @@ typedef struct File
 	unsigned int f_count;//引用计数
 	struct Inode *f_inode;//指向内存索引节点
 	unsigned long f_off;//读/写指针
+	bool operator==(const File& b) {
+		return this->f_inode->i_ino == b.f_inode->i_ino;
+	}
 }File;
 
 typedef struct user//用户结构
@@ -158,7 +161,7 @@ typedef struct user//用户结构
 	Dir cur_dir;
 	vector<string> path;
 	bool sudo;//管理员yes or no
-	unsigned short u_ofile[NOFILE];//用户打开文件表
+	vector<unsigned short> u_ofile;//用户打开文件表
 	user() {}
 	user(user_table u) {
 		this->u_default_mode = u.p_mode;
@@ -169,13 +172,13 @@ typedef struct user//用户结构
 	}
 }user;
 
-class FileSystem
+struct FileSystem
 {
 public:
 	SuperBlock superblock;
-	unordered_map<unsigned short, user> users;
-	unordered_map<int, Inode*> Hinode;
-	Dir root_dir;
+	map<unsigned short, user> users;
+	map<int, Inode*> Hinode;
+	Dir* root_dir;
 	int cur_userid;
 	Inode* cur_path_inode;
 	vector<user_table> reg_users;
@@ -188,32 +191,9 @@ extern void HomePage();
 extern status InitialFileSystem();
 extern status InitialUser();
 extern void LoadFileSystem();
-extern void SaveFileSystem();
 extern bool LogInFileSystem();
-extern bool ParsePath(string path);
-
-extern int SearchFile(string FileName);
-extern int BlockAssign();
-extern bool CreateFile(string FileName);
-extern bool DeleteFile(string FileName);
-extern bool ReadFile(string FileName);
-extern bool WriteFile(string FileName, string content);
-extern bool OpenFileFunc(string FileName);
-extern bool RenameFile(string OldFileName, string NewFileName);
-extern bool CloseFile(string FileName);
-extern bool CopyFile(string FileName, string path);
-extern void CutFile(string FileName, string path);
-
-extern bool MakeDirector(string DirectorName);
-extern int SearchDirector(string DirectorName);
-extern bool CloseFile(string FileName);
-extern bool ReturnToParentDir();
-extern bool EnterLowDir(string DirectorName);
-extern void ShowDirector();
-extern bool DeleteDirector(string DirectorName);
-extern bool RenameDirector(string OldDirectorName, string NewDirectorName);
-extern bool CopyDirector(string FileName, string path);
-extern void CutDirector(string DirectorName, string path);
+extern int CreateFile(const char * filename, unsigned short mode = FWRITE);
+extern void Chmod(int fid, unsigned short mode);
 extern Inode * iget(unsigned int dinodeid);
 extern void iput(Inode * pinode);
 extern void bfree(unsigned int block_num);
@@ -225,11 +205,23 @@ extern void ifree(unsigned dinodeid);
 extern void _dir();
 extern void mkdir(const char *dirname);
 extern bool access(Inode * inode, unsigned short mode);
-extern void chdir(const char * dirname);
-extern int creat(const char * filename, unsigned short mode);
-extern void close(unsigned short cfd);
-extern bool Delete(const char *filename);
+extern bool chdir(const char * dirname);
+extern bool DeleteFile(const char *filename);
 extern int open(const char * filename, unsigned short openmode);
 extern unsigned int read(int fd1, char * buf, unsigned int size);
-extern bool write(int fd1, char * buf, unsigned int size);
-
+extern bool DeleteDir(const char *filename);
+extern int search_uof(string filename);
+extern int write(int cfd, char * buf, unsigned int size);
+extern void CloseFile(unsigned short cfd);
+extern void halt();
+extern void InitialMemory();
+extern void Logout();
+extern void Regist();
+extern void Rename(string oldname, string newname);
+extern bool NameAccess(string name);
+extern bool ChangeDir(string path);
+extern void CopyFile(string org, string des);
+extern void MoveFile(string org, string des);
+extern void Copy(string org, string des);
+extern void ChangeUser();
+extern void save_cur_dir();

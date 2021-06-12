@@ -2,11 +2,13 @@
 
 status InitialUser()//将文件卷第0块读出，初始化用户信息
 {
+	myFileSystem.reg_users.clear();
 	int num_users = 0;
 	fseek(fp, 0, SEEK_SET);
 	fread(&num_users, sizeof(int), 1, fp);
 	for (int i = 0; i < num_users; ++i) {
 		user_table tmp;
+		fseek(fp, sizeof(int)+i*sizeof(user_table), SEEK_SET);
 		fread(&tmp, sizeof(user_table), 1, fp);
 		myFileSystem.reg_users.push_back(tmp);
 
@@ -14,11 +16,60 @@ status InitialUser()//将文件卷第0块读出，初始化用户信息
 	return OK;
 }
 
-/*status Regist()
+void InitialMemory()
 {
-
-}*/
-
+	int i, j;
+	if (!myFileSystem.Hinode.empty()) {
+		map<int, Inode*>::iterator iter;
+		iter = myFileSystem.Hinode.begin();
+		while (iter != myFileSystem.Hinode.end()) {
+			Inode* inode = iter->second;
+			long addr;
+			unsigned int block_num;
+			if (inode->di_number != 0)
+			{
+				/*write back the inode */
+				addr = DINODESTART + inode->i_ino * DINODESIZ;
+				fseek(fp, addr, SEEK_SET);
+				fwrite(&inode->di_number, DINODESIZ, 1, fp);
+			}
+			else
+			{
+				/*	rm the inode & the block of the file in the disk */
+				block_num = (unsigned int)inode->di_size / BLOCKSIZ;
+				for (i = 0; i < block_num; i++)
+				{
+					bfree(inode->di_addr[i]);
+				}
+				ifree(inode->i_ino);
+			}
+			iter++;
+		}
+	}
+	myFileSystem.Hinode.clear();//清空Hinode
+	//清空系统打开表
+	myFileSystem.sys_ofile.clear();
+	//清空用户打开表
+	myFileSystem.users[myFileSystem.cur_userid].u_ofile.clear();
+	//	write back the current directory 
+	myFileSystem.cur_path_inode->di_size = myFileSystem.users[myFileSystem.cur_userid].cur_dir.size*DIRITEM;
+	for (i = 0; i < myFileSystem.cur_path_inode->di_size / BLOCKSIZ + 1; i++)
+	{
+		bfree(myFileSystem.cur_path_inode->di_addr[i]);
+	}
+	for (i = 0; i < myFileSystem.users[myFileSystem.cur_userid].cur_dir.size; i += BLOCKSIZ / DIRITEM)
+	{
+		unsigned short block;
+		block = balloc();
+		myFileSystem.cur_path_inode->di_addr[i] = block;
+		fseek(fp, DATASTART + block * BLOCKSIZ, SEEK_SET);
+		fwrite(&myFileSystem.users[myFileSystem.cur_userid].cur_dir.direct[i], 1, BLOCKSIZ, fp);
+	}
+	iput(myFileSystem.cur_path_inode);
+	/**************step2: 写回磁盘块并关闭文件系统************************/
+	fseek(fp, SUPERSIZ, SEEK_SET);
+	fwrite(&myFileSystem.superblock, 1, sizeof(SuperBlock), fp);  //写回磁盘块
+}
 
 status InitialFileSystem()
 {
@@ -32,21 +83,21 @@ status InitialFileSystem()
 		cout << "创建文件卷失败！" << endl;
 		exit(0);
 	}
-	buf = (char *)malloc((DINODEBLK + FILEBLK + 2) * BLOCKSIZ * sizeof(char));
-	memset(buf, 0, (DINODEBLK + FILEBLK + 2) * BLOCKSIZ * sizeof(char));
+	buf = (char *)malloc(TOTALSIZ * sizeof(char));
+	memset(buf, 0, TOTALSIZ * sizeof(char));
 	if (buf == NULL)
 	{
 		printf("\nfile system file create failed! \n");
 		exit(0);
 	}
 	fseek(fp, 0, SEEK_SET);
-	fwrite(buf, 1, (DINODEBLK + FILEBLK + 2) * BLOCKSIZ * sizeof(char), fp);
-	/*0.initialize the passwd */
+	fwrite(buf, 1, TOTALSIZ * sizeof(char), fp);
+	//初始化管理员账户
 	int user_num = 1;
 	fseek(fp, 0, SEEK_SET);
 	fwrite(&user_num, sizeof(int), 1, fp);
 	user_table admin;
-	admin.p_mode = 01777;
+	admin.p_mode = 01017;
 	admin.p_uid = 0001;
 	admin.sudo = 'y';
 	admin.p_gid = 01;
@@ -55,13 +106,9 @@ status InitialFileSystem()
 	cin >> admin.p_name;
 	cout << "请输入管理员密码：";
 	cin >> admin.password;
+	fseek(fp, sizeof(int), SEEK_SET);
 	fwrite(&admin, sizeof(user_table), 1, fp);
-	/*strcpy(pwd0[0].p_name, "morgan");
-	pwd0[0].p_uid = 0001;
-	pwd0[0].p_mode = 01777;
-	pwd0[0].p_gid = 01;
-	pwd0[0].sudo = 'y';
-	strcpy(pwd0[0].password, "admin");*/
+
 	/*	1.creat the main directory and its sub dir etc and the file password */
 	inode = iget(0);	/* 0 empty dinode id */
 	inode->di_mode = DIEMPTY;
@@ -102,13 +149,7 @@ status InitialFileSystem()
 	inode->di_mode = DEFAULTMODE | DIFILE;
 	inode->di_size = BLOCKSIZ;
 	inode->di_addr[0] = 2;
-	/*for (i = 1; i < PWDNUM; i++)
-	{
-		pwd0[i].p_uid = 0;
-		pwd0[i].p_mode = DEFAULTMODE;
-		pwd0[i].p_gid = 0;
-		strcpy(pwd0[i].password, "	");
-	}*/
+
 	fseek(fp, DATASTART + 2 * BLOCKSIZ, SEEK_SET);
 	//fwrite(pwd0, 1, sizeof(pwd0), fp);
 	iput(inode);
@@ -147,7 +188,7 @@ status InitialFileSystem()
 		myFileSystem.superblock.s_free[NICFREE - 1 + i - j] = i;
 	}
 	myFileSystem.superblock.s_pfree = NICFREE - 1 - j + 3;
-	fseek(fp, BLOCKSIZ, SEEK_SET);
+	fseek(fp, SUPERSIZ, SEEK_SET);
 	fwrite(&myFileSystem.superblock, 1, sizeof(SuperBlock), fp);
 	//fclose(fp);
 	printf("\nformat finished!\n\n");

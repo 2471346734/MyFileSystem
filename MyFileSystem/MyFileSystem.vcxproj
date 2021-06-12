@@ -76,6 +76,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -103,11 +104,13 @@
     <ClCompile Include="DataBlock.cpp" />
     <ClCompile Include="Director.cpp" />
     <ClCompile Include="File.cpp" />
+    <ClCompile Include="halt.cpp" />
     <ClCompile Include="HomePage.cpp" />
     <ClCompile Include="InitialFileSystem.cpp" />
     <ClCompile Include="Inode.cpp" />
     <ClCompile Include="LoadFileSystem.cpp" />
     <ClCompile Include="LogInFileSystem.cpp" />
+    <ClCompile Include="Logout.cpp" />
     <ClCompile Include="MyFileSystem.cpp" />
     <ClCompile Include="Search.cpp" />
   </ItemGroup>
